@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coffee King — Tarjeta de Lealtad</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --espresso:#1a0a00;
+  --dark:#2c1503;
+  --brown:#4a2008;
+  --caramel:#8b4513;
+  --gold:#c8860a;
+  --gold-light:#e8a020;
+  --cream:#f5e6c8;
+  --cream-light:#fdf6e9;
+  --white:#fffdf8;
+  --muted:rgba(245,230,200,0.5);
+  --card-bg:rgba(255,255,255,0.06);
+  --card-border:rgba(200,134,10,0.2);
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Outfit',sans-serif;
+  background:var(--espresso);
+  color:var(--cream);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* BG texture */
+body::before{
+  content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 70% 50% at 15% 20%, rgba(74,32,8,.6) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 60% at 85% 80%, rgba(200,134,10,.08) 0%,transparent 55%),
+    radial-gradient(ellipse 40% 40% at 50% 50%, rgba(44,21,3,.8) 0%,transparent 70%);
+  pointer-events:none;z-index:0;
+}
+body::after{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c8860a' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  pointer-events:none;z-index:0;opacity:.5;
+}
+
+.screen{
+  position:relative;z-index:1;
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  padding:24px 20px;
+}
+.screen.top-align{align-items:flex-start;padding-top:32px}
+
+/* ── LANDING ── */
+.landing-box{text-align:center;max-width:360px;width:100%;animation:fadeUp .8s ease both}
+.crown-icon{
+  width:72px;height:72px;margin:0 auto 20px;
+  background:linear-gradient(135deg,var(--gold),var(--gold-light));
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:34px;box-shadow:0 0 40px rgba(200,134,10,.4),0 0 80px rgba(200,134,10,.15);
+  animation:glowPulse 3s ease-in-out infinite;
+}
+.brand-name{
+  font-family:'Playfair Display',serif;
+  font-size:38px;font-weight:700;letter-spacing:-.5px;
+  background:linear-gradient(135deg,var(--gold-light),var(--cream));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:6px;
+}
+.brand-sub{font-size:13px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;font-weight:500;margin-bottom:40px}
+
+.login-options{display:flex;flex-direction:column;gap:12px}
+.login-btn{
+  padding:16px 24px;border:none;border-radius:16px;
+  font-family:'Outfit',sans-serif;font-weight:600;font-size:15px;
+  cursor:pointer;transition:all .3s ease;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  position:relative;overflow:hidden;
+}
+.login-btn::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .3s}
+.login-btn:hover::before{opacity:1}
+.btn-admin{
+  background:linear-gradient(135deg,var(--gold),var(--caramel));
+  color:var(--espresso);
+  box-shadow:0 4px 24px rgba(200,134,10,.35);
+}
+.btn-admin:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(200,134,10,.5)}
+.btn-client{
+  background:var(--card-bg);
+  border:1px solid var(--card-border);
+  color:var(--cream);
+  backdrop-filter:blur(12px);
+}
+.btn-client:hover{background:rgba(200,134,10,.12);border-color:rgba(200,134,10,.4);transform:translateY(-2px)}
+
+/* ── FORMS ── */
+.form-box{
+  background:rgba(44,21,3,.7);
+  border:1px solid var(--card-border);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-radius:24px;padding:32px 28px;
+  width:100%;max-width:380px;
+  animation:popIn .4s cubic-bezier(.34,1.56,.64,1) both;
+}
+.form-header{text-align:center;margin-bottom:28px}
+.form-icon{font-size:32px;margin-bottom:10px}
+.form-title{font-family:'Playfair Display',serif;font-size:24px;color:var(--cream-light);margin-bottom:4px}
+.form-sub{font-size:13px;color:var(--muted)}
+
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+.field input{
+  width:100%;background:rgba(255,255,255,.06);
+  border:1px solid rgba(200,134,10,.25);border-radius:12px;
+  padding:14px 16px;font-size:15px;font-family:'Outfit',sans-serif;
+  color:var(--cream-light);outline:none;
+  transition:border-color .3s,background .3s,box-shadow .3s;
+}
+.field input::placeholder{color:rgba(245,230,200,.3)}
+.field input:focus{border-color:var(--gold);background:rgba(200,134,10,.08);box-shadow:0 0 0 3px rgba(200,134,10,.15)}
+
+.err-msg{background:rgba(220,50,50,.15);border:1px solid rgba(220,50,50,.3);border-radius:10px;padding:10px 14px;font-size:13px;color:#ff8080;margin-bottom:14px;display:none}
+.err-msg.show{display:block;animation:shake .4s ease}
+
+.btn{
+  width:100%;padding:15px 20px;border:none;border-radius:14px;
+  font-family:'Outfit',sans-serif;font-weight:600;font-size:15px;
+  cursor:pointer;transition:all .25s ease;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:var(--espresso);box-shadow:0 4px 20px rgba(200,134,10,.4)}
+.btn-gold:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(200,134,10,.55)}
+.btn-outline{background:transparent;border:1px solid rgba(245,230,200,.2);color:var(--muted)}
+.btn-outline:hover{background:rgba(255,255,255,.05);color:var(--cream)}
+.btn-danger-soft{background:rgba(220,50,50,.15);border:1px solid rgba(220,50,50,.3);color:#ff8080}
+.btn-danger-soft:hover{background:rgba(220,50,50,.25)}
+.mt-10{margin-top:10px}
+
+/* ── ADMIN DASHBOARD ── */
+.dashboard{max-width:480px;width:100%;animation:fadeUp .6s ease both}
+.dash-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:28px;
+  padding-bottom:18px;border-bottom:1px solid rgba(200,134,10,.15);
+}
+.dash-brand{display:flex;align-items:center;gap:10px}
+.dash-crown{
+  width:38px;height:38px;background:linear-gradient(135deg,var(--gold),var(--gold-light));
+  border-radius:10px;display:flex;align-items:center;justify-content:center;
+  font-size:18px;box-shadow:0 0 16px rgba(200,134,10,.4);
+}
+.dash-title{font-family:'Playfair Display',serif;font-size:20px;color:var(--cream-light)}
+.dash-role{font-size:11px;color:var(--gold);font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.logout-btn{
+  background:transparent;border:1px solid rgba(245,230,200,.15);
+  color:var(--muted);border-radius:10px;padding:8px 14px;
+  font-size:12px;font-family:'Outfit',sans-serif;cursor:pointer;
+  transition:all .2s;font-weight:500;
+}
+.logout-btn:hover{border-color:rgba(245,230,200,.35);color:var(--cream)}
+
+/* Stats row */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.stat-card{
+  background:var(--card-bg);border:1px solid var(--card-border);
+  backdrop-filter:blur(12px);border-radius:16px;padding:14px;text-align:center;
+}
+.stat-num{font-family:'Playfair Display',serif;font-size:26px;color:var(--gold-light)}
+.stat-label{font-size:11px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+
+/* Tab bar */
+.tab-bar{display:flex;background:rgba(255,255,255,.04);border-radius:14px;padding:4px;gap:4px;margin-bottom:20px}
+.tab{
+  flex:1;padding:10px;border:none;border-radius:10px;
+  font-family:'Outfit',sans-serif;font-weight:500;font-size:13px;
+  cursor:pointer;transition:all .25s;color:var(--muted);background:transparent;
+}
+.tab.active{background:linear-gradient(135deg,var(--gold),var(--caramel));color:var(--espresso);font-weight:600;box-shadow:0 2px 10px rgba(200,134,10,.35)}
+.tab:hover:not(.active){color:var(--cream);background:rgba(255,255,255,.05)}
+
+/* Tab panels */
+.tab-panel{display:none;animation:fadeUp .3s ease both}
+.tab-panel.active{display:block}
+
+/* Scanner section */
+.scanner-section{}
+.scan-area{
+  background:rgba(44,21,3,.5);border:2px dashed rgba(200,134,10,.3);
+  border-radius:20px;padding:24px;text-align:center;margin-bottom:16px;
+  position:relative;overflow:hidden;
+}
+.scan-area.scanning{border-color:var(--gold);border-style:solid;background:rgba(200,134,10,.06)}
+#qr-video-container{display:none;margin-bottom:12px}
+#qr-video{width:100%;border-radius:12px;max-height:240px;object-fit:cover}
+.scan-placeholder-icon{font-size:48px;margin-bottom:10px;opacity:.6}
+.scan-placeholder-text{font-size:14px;color:var(--muted);line-height:1.5;margin-bottom:16px}
+.scan-result-card{
+  display:none;
+  background:rgba(200,134,10,.1);border:1px solid rgba(200,134,10,.3);
+  border-radius:16px;padding:20px;margin-bottom:14px;text-align:left;
+  animation:fadeUp .4s ease both;
+}
+.scan-result-card.show{display:block}
+.src-name{font-family:'Playfair Display',serif;font-size:20px;color:var(--cream-light);margin-bottom:4px}
+.src-phone{font-size:13px;color:var(--muted);margin-bottom:14px}
+.src-stamps{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.stamp{
+  width:36px;height:36px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;border:2px solid rgba(200,134,10,.3);
+  background:rgba(255,255,255,.04);transition:all .4s;
+}
+.stamp.filled{background:linear-gradient(135deg,var(--gold),var(--gold-light));border-color:var(--gold);box-shadow:0 0 12px rgba(200,134,10,.4)}
+.stamp.free{background:linear-gradient(135deg,#2d7a22,#44a832);border-color:#44a832;box-shadow:0 0 12px rgba(68,168,50,.4);animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both}
+.src-actions{display:flex;gap:8px}
+.src-actions .btn{padding:11px 16px;font-size:14px}
+
+/* Clients list */
+.clients-list{display:flex;flex-direction:column;gap:10px}
+.client-row{
+  background:var(--card-bg);border:1px solid var(--card-border);
+  border-radius:16px;padding:16px;
+  display:flex;align-items:center;gap:14px;
+  cursor:pointer;transition:all .2s;
+}
+.client-row:hover{background:rgba(200,134,10,.08);border-color:rgba(200,134,10,.35);transform:translateX(3px)}
+.client-avatar{
+  width:42px;height:42px;border-radius:50%;
+  background:linear-gradient(135deg,var(--brown),var(--caramel));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Playfair Display',serif;font-size:18px;color:var(--cream);
+  flex-shrink:0;font-weight:700;
+}
+.client-info{flex:1}
+.client-name{font-weight:600;font-size:15px;color:var(--cream-light);margin-bottom:2px}
+.client-detail{font-size:12px;color:var(--muted)}
+.client-stamps-mini{display:flex;gap:4px;align-items:center}
+.stamp-mini{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(200,134,10,.2)}
+.stamp-mini.on{background:var(--gold);border-color:var(--gold)}
+
+/* Add client */
+.add-client-form{
+  background:var(--card-bg);border:1px solid var(--card-border);
+  border-radius:20px;padding:20px;
+}
+.add-client-title{font-family:'Playfair Display',serif;font-size:18px;color:var(--cream-light);margin-bottom:16px}
+
+/* ── CLIENT VIEW ── */
+.client-view{max-width:380px;width:100%;animation:fadeUp .6s ease both}
+.cv-header{text-align:center;margin-bottom:28px}
+.cv-brand{font-family:'Playfair Display',serif;font-size:28px;color:var(--gold-light);margin-bottom:2px}
+.cv-welcome{font-size:13px;color:var(--muted);letter-spacing:.08em}
+
+.loyalty-card{
+  background:linear-gradient(135deg,#2c1503 0%,#4a2008 50%,#2c1503 100%);
+  border:1px solid rgba(200,134,10,.35);
+  border-radius:24px;padding:24px;margin-bottom:20px;
+  position:relative;overflow:hidden;
+  box-shadow:0 8px 40px rgba(0,0,0,.5),0 0 0 1px rgba(200,134,10,.1);
+}
+.loyalty-card::before{
+  content:'';position:absolute;top:-40px;right:-40px;
+  width:160px;height:160px;border-radius:50%;
+  background:radial-gradient(rgba(200,134,10,.12),transparent 70%);
+}
+.loyalty-card::after{
+  content:'';position:absolute;bottom:-30px;left:-30px;
+  width:120px;height:120px;border-radius:50%;
+  background:radial-gradient(rgba(200,134,10,.08),transparent 70%);
+}
+.lc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;position:relative;z-index:1}
+.lc-brand-row{display:flex;align-items:center;gap:8px}
+.lc-crown{font-size:22px}
+.lc-name{font-family:'Playfair Display',serif;font-size:18px;color:var(--gold-light)}
+.lc-member{font-size:11px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.08em}
+.lc-client-name{font-family:'Playfair Display',serif;font-size:22px;color:var(--cream-light);margin-bottom:2px;position:relative;z-index:1}
+.lc-stamps-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:16px 0;position:relative;z-index:1}
+.lc-stamp{
+  aspect-ratio:1;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;border:1.5px solid rgba(200,134,10,.25);
+  background:rgba(255,255,255,.04);
+  transition:all .4s cubic-bezier(.34,1.56,.64,1);
+}
+.lc-stamp.filled{
+  background:linear-gradient(135deg,var(--gold),var(--gold-light));
+  border-color:var(--gold);
+  box-shadow:0 0 16px rgba(200,134,10,.5);
+  transform:scale(1.05);
+}
+.lc-stamp.free{
+  background:linear-gradient(135deg,#1a5c14,#2d8a24);
+  border-color:#44a832;
+  box-shadow:0 0 20px rgba(68,168,50,.5);
+}
+.lc-progress-bar{height:4px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden;margin-top:6px;position:relative;z-index:1}
+.lc-progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-light));border-radius:4px;transition:width .6s ease}
+.lc-progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px;position:relative;z-index:1}
+
+/* QR display */
+.qr-section{
+  background:var(--card-bg);border:1px solid var(--card-border);
+  border-radius:20px;padding:20px;text-align:center;margin-bottom:16px;
+}
+.qr-label{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
+#client-qr-display{display:flex;justify-content:center;margin-bottom:10px}
+#client-qr-display canvas,#client-qr-display img{border-radius:10px;border:3px solid var(--cream-light)}
+.qr-hint{font-size:12px;color:var(--muted);line-height:1.5}
+
+/* Free coffee banner */
+.free-banner{
+  display:none;
+  background:linear-gradient(135deg,#1a5c14,#2d8a24);
+  border:1px solid rgba(68,168,50,.4);
+  border-radius:16px;padding:18px;text-align:center;margin-bottom:16px;
+  animation:popIn .6s cubic-bezier(.34,1.56,.64,1) both;
+}
+.free-banner.show{display:block}
+.free-banner-emoji{font-size:36px;margin-bottom:6px}
+.free-banner-title{font-family:'Playfair Display',serif;font-size:20px;color:#90ee80;margin-bottom:4px}
+.free-banner-text{font-size:13px;color:rgba(255,255,255,.7)}
+
+/* ── TOAST ── */
+#toast{
+  position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:rgba(44,21,3,.95);border:1px solid rgba(200,134,10,.4);
+  backdrop-filter:blur(16px);border-radius:14px;
+  padding:12px 20px;font-size:14px;color:var(--cream-light);font-weight:500;
+  z-index:999;opacity:0;transition:all .35s ease;white-space:nowrap;
+  box-shadow:0 8px 32px rgba(0,0,0,.5);
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── OVERLAY ── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;background:rgba(10,4,0,.8);
+  backdrop-filter:blur(8px);z-index:100;
+  align-items:center;justify-content:center;padding:20px;
+}
+.modal-overlay.show{display:flex;animation:fadeIn .3s ease}
+.modal-box{
+  background:#2c1503;border:1px solid var(--card-border);
+  border-radius:24px;padding:28px;width:100%;max-width:360px;
+  animation:popIn .4s cubic-bezier(.34,1.56,.64,1) both;
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes popIn{from{opacity:0;transform:scale(.82)}to{opacity:1;transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+@keyframes glowPulse{0%,100%{box-shadow:0 0 40px rgba(200,134,10,.4),0 0 80px rgba(200,134,10,.15)}50%{box-shadow:0 0 60px rgba(200,134,10,.6),0 0 100px rgba(200,134,10,.25)}}
+@keyframes stampPop{0%{transform:scale(0)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
+.stamp-pop{animation:stampPop .4s cubic-bezier(.34,1.56,.64,1) both}
+
+/* no clients */
+.empty-state{text-align:center;padding:32px;color:var(--muted)}
+.empty-icon{font-size:40px;margin-bottom:10px;opacity:.5}
+.empty-text{font-size:14px;line-height:1.6}
+</style>
+</head>
+<body>
+
+<!-- ══════════ LANDING ══════════ -->
+<div class="screen" id="screen-landing">
+  <div class="landing-box">
+    <div class="crown-icon">☕</div>
+    <div class="brand-name">Coffee King</div>
+    <div class="brand-sub">Tarjeta de lealtad</div>
+    <div class="login-options">
+      <button class="login-btn btn-admin" onclick="showScreen('screen-admin-login')">
+        <span>👑</span> Acceso Administrador
+      </button>
+      <button class="login-btn btn-client" onclick="showScreen('screen-client-login')">
+        <span>☕</span> Ver mi tarjeta
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ ADMIN LOGIN ══════════ -->
+<div class="screen" id="screen-admin-login" style="display:none">
+  <div class="form-box">
+    <div class="form-header">
+      <div class="form-icon">👑</div>
+      <div class="form-title">Administrador</div>
+      <div class="form-sub">Acceso al panel de control</div>
+    </div>
+    <div class="err-msg" id="admin-err">Usuario o contraseña incorrectos</div>
+    <div class="field">
+      <label>Usuario</label>
+      <input type="text" id="admin-user" placeholder="admin" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Contraseña</label>
+      <input type="password" id="admin-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')adminLogin()">
+    </div>
+    <button class="btn btn-gold" onclick="adminLogin()">Entrar al panel</button>
+    <button class="btn btn-outline mt-10" onclick="showScreen('screen-landing')">Volver</button>
+  </div>
+</div>
+
+<!-- ══════════ CLIENT LOGIN ══════════ -->
+<div class="screen" id="screen-client-login" style="display:none">
+  <div class="form-box">
+    <div class="form-header">
+      <div class="form-icon">☕</div>
+      <div class="form-title">Tu tarjeta</div>
+      <div class="form-sub">Ingresa tu numero de telefono</div>
+    </div>
+    <div class="err-msg" id="client-err">No encontramos esa cuenta. Pide al admin que te registre.</div>
+    <div class="field">
+      <label>Telefono</label>
+      <input type="tel" id="client-phone" placeholder="6441234567" maxlength="15" onkeydown="if(event.key==='Enter')clientLogin()">
+    </div>
+    <button class="btn btn-gold" onclick="clientLogin()">Ver mi tarjeta</button>
+    <button class="btn btn-outline mt-10" onclick="showScreen('screen-landing')">Volver</button>
+  </div>
+</div>
+
+<!-- ══════════ ADMIN DASHBOARD ══════════ -->
+<div class="screen top-align" id="screen-admin" style="display:none">
+  <div class="dashboard">
+    <div class="dash-header">
+      <div class="dash-brand">
+        <div class="dash-crown">☕</div>
+        <div>
+          <div class="dash-title">Coffee King</div>
+          <div class="dash-role">Panel Admin</div>
+        </div>
+      </div>
+      <button class="logout-btn" onclick="logout()">Salir</button>
+    </div>
+
+    <div class="stats-row" id="stats-row">
+      <div class="stat-card">
+        <div class="stat-num" id="stat-clients">0</div>
+        <div class="stat-label">Clientes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-stamps">0</div>
+        <div class="stat-label">Sellos totales</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-free">0</div>
+        <div class="stat-label">Cafes gratis</div>
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      <button class="tab active" onclick="setTab('scan')">📷 Escanear</button>
+      <button class="tab" onclick="setTab('clients')">👥 Clientes</button>
+      <button class="tab" onclick="setTab('add')">➕ Agregar</button>
+    </div>
+
+    <!-- TAB: SCAN -->
+    <div class="tab-panel active" id="tab-scan">
+      <div class="scan-area" id="scan-area">
+        <div id="scan-placeholder">
+          <div class="scan-placeholder-icon">📱</div>
+          <div class="scan-placeholder-text">Escanea el codigo QR del cliente con tu camara</div>
+          <button class="btn btn-gold" onclick="startScanner()" style="max-width:220px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h7v7"/></svg>
+            Activar camara
+          </button>
+        </div>
+        <div id="qr-video-container">
+          <video id="qr-video" autoplay muted playsinline></video>
+          <button class="btn btn-outline mt-10" onclick="stopScanner()" style="max-width:200px;margin:10px auto 0">Cancelar</button>
+        </div>
+      </div>
+
+      <div class="scan-result-card" id="scan-result">
+        <div class="src-name" id="sr-name">—</div>
+        <div class="src-phone" id="sr-phone">—</div>
+        <div class="src-stamps" id="sr-stamps"></div>
+        <div class="src-actions">
+          <button class="btn btn-gold" onclick="addStamp()" style="flex:1">
+            ☕ Agregar cafe
+          </button>
+          <button class="btn btn-outline" onclick="clearScan()" style="width:auto;padding:11px 16px">
+            ✕
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: CLIENTS -->
+    <div class="tab-panel" id="tab-clients">
+      <div class="clients-list" id="clients-list"></div>
+    </div>
+
+    <!-- TAB: ADD CLIENT -->
+    <div class="tab-panel" id="tab-add">
+      <div class="add-client-form">
+        <div class="add-client-title">Registrar cliente</div>
+        <div class="err-msg" id="add-err">Este numero ya esta registrado</div>
+        <div class="field">
+          <label>Nombre</label>
+          <input type="text" id="add-name" placeholder="Nombre del cliente" autocomplete="off">
+        </div>
+        <div class="field">
+          <label>Telefono</label>
+          <input type="tel" id="add-phone" placeholder="6441234567" maxlength="15">
+        </div>
+        <button class="btn btn-gold" onclick="addClient()">Registrar cliente</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ CLIENT VIEW ══════════ -->
+<div class="screen top-align" id="screen-client" style="display:none">
+  <div class="client-view">
+    <div class="cv-header">
+      <div class="cv-brand">Coffee King</div>
+      <div class="cv-welcome" id="cv-welcome">Bienvenido</div>
+    </div>
+
+    <div class="free-banner" id="free-banner">
+      <div class="free-banner-emoji">🎉</div>
+      <div class="free-banner-title">Tienes un cafe gratis!</div>
+      <div class="free-banner-text">Muestra esta pantalla al admin para canjear tu recompensa</div>
+    </div>
+
+    <div class="loyalty-card" id="loyalty-card">
+      <div class="lc-top">
+        <div class="lc-brand-row">
+          <div class="lc-crown">☕</div>
+          <div class="lc-name">Coffee King</div>
+        </div>
+        <div class="lc-member">Miembro</div>
+      </div>
+      <div class="lc-client-name" id="lc-client-name">—</div>
+      <div class="lc-stamps-grid" id="lc-stamps-grid"></div>
+      <div class="lc-progress-bar">
+        <div class="lc-progress-fill" id="lc-progress-fill" style="width:0%"></div>
+      </div>
+      <div class="lc-progress-label">
+        <span id="lc-progress-text">0 de 10 cafes</span>
+        <span>🏆 Cafe gratis al completar</span>
+      </div>
+    </div>
+
+    <div class="qr-section">
+      <div class="qr-label">Mi codigo QR</div>
+      <div id="client-qr-display"></div>
+      <div class="qr-hint">Muestra este codigo al admin cuando compres tu cafe</div>
+    </div>
+
+    <button class="btn btn-outline" onclick="logout()">Salir</button>
+  </div>
+</div>
+
+<!-- Modal: cliente detail desde admin -->
+<div class="modal-overlay" id="client-modal">
+  <div class="modal-box">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div style="font-family:'Playfair Display',serif;font-size:20px;color:var(--cream-light)" id="modal-name">—</div>
+      <button onclick="closeModal()" style="background:transparent;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
+    </div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:16px" id="modal-phone">—</div>
+    <div class="src-stamps" id="modal-stamps" style="margin-bottom:16px"></div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn btn-gold" onclick="addStampFromModal()">☕ Agregar sello</button>
+      <button class="btn btn-danger-soft" onclick="confirmDeleteClient()">🗑 Eliminar cliente</button>
+      <button class="btn btn-outline" onclick="closeModal()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ════ CREDENTIALS ════ */
+var ADMIN_USER = "CoffeeKing";
+var ADMIN_PASS = "Aly3087";
+
+/* ════ STATE ════ */
+var clients = JSON.parse(localStorage.getItem("ck_clients") || "{}");
+var currentAdmin = false;
+var currentClientId = null;
+var scannedClientId = null;
+var modalClientId = null;
+var videoStream = null;
+var scanInterval = null;
+
+function saveClients(){localStorage.setItem("ck_clients",JSON.stringify(clients));}
+
+/* ════ SCREEN NAV ════ */
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(function(s){s.style.display="none";});
+  var s=document.getElementById(id);
+  s.style.display="flex";
+  // re-trigger animation
+  s.querySelectorAll("[style*='animation']").forEach(function(el){el.style.animation="none";void el.offsetWidth;el.style.animation="";});
+}
+
+/* ════ AUTH ════ */
+function adminLogin(){
+  var u=document.getElementById("admin-user").value.trim();
+  var p=document.getElementById("admin-pass").value;
+  var err=document.getElementById("admin-err");
+  if(u===ADMIN_USER && p===ADMIN_PASS){
+    err.classList.remove("show");
+    currentAdmin=true;
+    renderAdminDashboard();
+    showScreen("screen-admin");
+  } else {
+    err.classList.remove("show");void err.offsetWidth;err.classList.add("show");
+  }
+}
+
+function clientLogin(){
+  var phone=document.getElementById("client-phone").value.trim().replace(/\D/g,"");
+  var err=document.getElementById("client-err");
+  var c=clients[phone];
+  if(c){
+    err.classList.remove("show");
+    currentClientId=phone;
+    renderClientView(phone);
+    showScreen("screen-client");
+  } else {
+    err.classList.remove("show");void err.offsetWidth;err.classList.add("show");
+  }
+}
+
+function logout(){
+  stopScanner();
+  currentAdmin=false;currentClientId=null;scannedClientId=null;
+  document.getElementById("admin-user").value="";
+  document.getElementById("admin-pass").value="";
+  document.getElementById("client-phone").value="";
+  showScreen("screen-landing");
+}
+
+/* ════ ADMIN DASHBOARD ════ */
+function renderAdminDashboard(){
+  updateStats();
+  renderClientsList();
+}
+
+function updateStats(){
+  var ids=Object.keys(clients);
+  var totalStamps=0,totalFree=0;
+  ids.forEach(function(id){totalStamps+=clients[id].stamps;totalFree+=clients[id].freeCoffees||0;});
+  document.getElementById("stat-clients").textContent=ids.length;
+  document.getElementById("stat-stamps").textContent=totalStamps;
+  document.getElementById("stat-free").textContent=totalFree;
+}
+
+function renderClientsList(){
+  var list=document.getElementById("clients-list");
+  var ids=Object.keys(clients);
+  if(ids.length===0){
+    list.innerHTML='<div class="empty-state"><div class="empty-icon">☕</div><div class="empty-text">No hay clientes registrados aun.<br>Agrega uno en la pestana "Agregar".</div></div>';
+    return;
+  }
+  list.innerHTML="";
+  ids.forEach(function(id){
+    var c=clients[id];
+    var row=document.createElement("div");
+    row.className="client-row";
+    row.onclick=function(){openClientModal(id);};
+    var stamps=c.stamps%10;
+    var dotHTML="";
+    for(var i=0;i<10;i++){dotHTML+='<div class="stamp-mini'+(i<stamps?" on":"")+'"></div>';}
+    var initial=c.name.charAt(0).toUpperCase();
+    row.innerHTML='<div class="client-avatar">'+initial+'</div><div class="client-info"><div class="client-name">'+c.name+'</div><div class="client-detail">'+id+' &bull; '+stamps+'/10 cafes</div></div><div class="client-stamps-mini">'+dotHTML+'</div>';
+    list.appendChild(row);
+  });
+}
+
+function setTab(name){
+  document.querySelectorAll(".tab").forEach(function(t,i){
+    var names=["scan","clients","add"];
+    t.classList.toggle("active",names[i]===name);
+  });
+  document.querySelectorAll(".tab-panel").forEach(function(p){p.classList.remove("active");});
+  document.getElementById("tab-"+name).classList.add("active");
+  if(name!=="scan")stopScanner();
+  if(name==="clients")renderClientsList();
+}
+
+/* ════ ADD CLIENT ════ */
+function addClient(){
+  var name=document.getElementById("add-name").value.trim();
+  var phone=document.getElementById("add-phone").value.trim().replace(/\D/g,"");
+  var err=document.getElementById("add-err");
+  if(!name||!phone){showToast("Completa todos los campos");return;}
+  if(clients[phone]){err.classList.remove("show");void err.offsetWidth;err.classList.add("show");return;}
+  err.classList.remove("show");
+  clients[phone]={name:name,stamps:0,freeCoffees:0,joined:Date.now()};
+  saveClients();
+  document.getElementById("add-name").value="";
+  document.getElementById("add-phone").value="";
+  showToast("Cliente registrado: "+name);
+  updateStats();
+}
+
+/* ════ QR SCANNER ════ */
+function startScanner(){
+  document.getElementById("scan-placeholder").style.display="none";
+  document.getElementById("qr-video-container").style.display="block";
+  document.getElementById("scan-area").classList.add("scanning");
+
+  navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}})
+  .then(function(stream){
+    videoStream=stream;
+    var vid=document.getElementById("qr-video");
+    vid.srcObject=stream;
+    vid.play();
+    // Load jsQR dynamically
+    var script=document.createElement("script");
+    script.src="https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.min.js";
+    script.onload=function(){startFrameScan();};
+    document.head.appendChild(script);
+  })
+  .catch(function(){
+    showToast("No se pudo acceder a la camara");
+    stopScanner();
+  });
+}
+
+function startFrameScan(){
+  var vid=document.getElementById("qr-video");
+  var canvas=document.createElement("canvas");
+  var ctx=canvas.getContext("2d");
+  scanInterval=setInterval(function(){
+    if(vid.readyState===vid.HAVE_ENOUGH_DATA){
+      canvas.width=vid.videoWidth;canvas.height=vid.videoHeight;
+      ctx.drawImage(vid,0,0);
+      var img=ctx.getImageData(0,0,canvas.width,canvas.height);
+      if(typeof jsQR==="undefined")return;
+      var code=jsQR(img.data,img.width,img.height,{inversionAttempts:"dontInvert"});
+      if(code){
+        var data=code.data;
+        if(data.startsWith("CK:")){
+          var phone=data.replace("CK:","");
+          if(clients[phone]){
+            stopScanner();
+            showScanResult(phone);
+          } else {
+            showToast("Cliente no encontrado: "+phone);
+          }
+        }
+      }
+    }
+  },200);
+}
+
+function stopScanner(){
+  clearInterval(scanInterval);scanInterval=null;
+  if(videoStream){videoStream.getTracks().forEach(function(t){t.stop();});videoStream=null;}
+  document.getElementById("qr-video-container").style.display="none";
+  document.getElementById("scan-placeholder").style.display="block";
+  document.getElementById("scan-area").classList.remove("scanning");
+}
+
+function showScanResult(phone){
+  scannedClientId=phone;
+  var c=clients[phone];
+  document.getElementById("sr-name").textContent=c.name;
+  document.getElementById("sr-phone").textContent=phone;
+  renderStampsRow("sr-stamps",c.stamps);
+  document.getElementById("scan-result").classList.add("show");
+}
+
+function clearScan(){
+  scannedClientId=null;
+  document.getElementById("scan-result").classList.remove("show");
+}
+
+function renderStampsRow(containerId,totalStamps){
+  var cont=document.getElementById(containerId);
+  cont.innerHTML="";
+  var current=totalStamps%10;
+  var hasReward=(totalStamps>0 && totalStamps%10===0);
+  for(var i=0;i<10;i++){
+    var div=document.createElement("div");
+    div.className="stamp";
+    if(hasReward && i===9){div.classList.add("free");div.textContent="🎁";}
+    else if(i<current){div.classList.add("filled");div.textContent="☕";}
+    else{div.textContent="";}
+    cont.appendChild(div);
+  }
+}
+
+/* ════ ADD STAMP ════ */
+function addStamp(){
+  if(!scannedClientId)return;
+  var c=clients[scannedClientId];
+  c.stamps++;
+  if(c.stamps%10===0){
+    c.freeCoffees=(c.freeCoffees||0)+1;
+    saveClients();
+    renderStampsRow("sr-stamps",c.stamps);
+    updateStats();
+    showToast("Cafe #"+c.stamps+" — CAFE GRATIS desbloqueado para "+c.name+"!");
+  } else {
+    saveClients();
+    renderStampsRow("sr-stamps",c.stamps);
+    updateStats();
+    showToast("Sello agregado: "+(c.stamps%10)+"/10 — "+c.name);
+  }
+}
+
+/* ════ CLIENT MODAL ════ */
+function openClientModal(id){
+  modalClientId=id;
+  var c=clients[id];
+  document.getElementById("modal-name").textContent=c.name;
+  document.getElementById("modal-phone").textContent=id+" • "+c.stamps+" sellos totales • "+(c.freeCoffees||0)+" gratis";
+  renderStampsRow("modal-stamps",c.stamps);
+  document.getElementById("client-modal").classList.add("show");
+}
+
+function closeModal(){document.getElementById("client-modal").classList.remove("show");modalClientId=null;}
+
+function addStampFromModal(){
+  if(!modalClientId)return;
+  var c=clients[modalClientId];
+  c.stamps++;
+  if(c.stamps%10===0)c.freeCoffees=(c.freeCoffees||0)+1;
+  saveClients();
+  renderStampsRow("modal-stamps",c.stamps);
+  document.getElementById("modal-phone").textContent=modalClientId+" • "+c.stamps+" sellos totales • "+(c.freeCoffees||0)+" gratis";
+  updateStats();renderClientsList();
+  showToast(c.stamps%10===0?"Cafe gratis para "+c.name+"!":"Sello agregado — "+(c.stamps%10)+"/10");
+}
+
+function confirmDeleteClient(){
+  if(!modalClientId)return;
+  var name=clients[modalClientId].name;
+  if(confirm("Eliminar a "+name+"? Esta accion no se puede deshacer.")){
+    delete clients[modalClientId];
+    saveClients();
+    closeModal();
+    updateStats();renderClientsList();
+    showToast(name+" eliminado");
+  }
+}
+
+/* ════ CLIENT VIEW ════ */
+function renderClientView(phone){
+  var c=clients[phone];
+  document.getElementById("cv-welcome").textContent="Hola, "+c.name;
+  document.getElementById("lc-client-name").textContent=c.name;
+
+  // Stamps grid
+  var grid=document.getElementById("lc-stamps-grid");
+  grid.innerHTML="";
+  var current=c.stamps%10;
+  var hasReward=(c.stamps>0 && c.stamps%10===0);
+  for(var i=0;i<10;i++){
+    var div=document.createElement("div");
+    div.className="lc-stamp";
+    if(hasReward && i===9){div.classList.add("free");div.textContent="🎁";}
+    else if(i<current){div.classList.add("filled");div.textContent="☕";}
+    else{div.textContent="○";}
+    grid.appendChild(div);
+  }
+
+  // Progress
+  var pct=hasReward?100:(current/10*100);
+  document.getElementById("lc-progress-fill").style.width=pct+"%";
+  document.getElementById("lc-progress-text").textContent=(hasReward?"10":""+current)+" de 10 cafes";
+
+  // Free banner
+  var banner=document.getElementById("free-banner");
+  banner.classList.toggle("show",hasReward||(c.freeCoffees||0)>0 && c.stamps%10===0);
+
+  // QR code
+  var qrDiv=document.getElementById("client-qr-display");
+  qrDiv.innerHTML="";
+  new QRCode(qrDiv,{
+    text:"CK:"+phone,
+    width:180,height:180,
+    colorDark:"#1a0a00",colorLight:"#fffdf8",
+    correctLevel:QRCode.CorrectLevel.H
+  });
+}
+
+/* ════ TOAST ════ */
+var toastTimer=null;
+function showToast(msg){
+  var t=document.getElementById("toast");
+  t.textContent=msg;t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){t.classList.remove("show");},3000);
+}
+
+/* close modal on bg click */
+document.getElementById("client-modal").addEventListener("click",function(e){
+  if(e.target===this)closeModal();
+});
+</script>
+</body>
+</html>
